@@ -47,7 +47,7 @@ app.post('/api/session', (req, res) => {
     const { amount } = req.body;
 
     if (!amount || typeof amount !== 'number' || amount <= 0) {
-        return res.status(400).json({ error: 'Invalid amount. Must be a positive number.' });
+        return res.status(400).json({ error: 'invalid amount' });
     }
 
     const sessionId = uuidv4();
@@ -71,7 +71,7 @@ app.get('/api/status/:sessionId', (req, res) => {
     const session = sessions.get(sessionId);
 
     if (!session) {
-        return res.status(404).json({ error: 'Session not found or expired' });
+        return res.status(404).json({ error: 'session not found' });
     }
 
     res.json({ status: session.status });
@@ -83,11 +83,11 @@ app.post('/api/confirm/:sessionId', (req, res) => {
     const session = sessions.get(sessionId);
 
     if (!session) {
-        return res.status(404).send(getErrorHtml('Phien thanh toan khong ton tai hoac da het han.'));
+        return res.status(404).send(getErrorHtml('Phiên thanh toán không tồn tại hoặc đã hết hạn.'));
     }
 
     if (session.status !== 'pending') {
-        return res.status(400).send(getErrorHtml('Phien thanh toan da duoc xu ly truoc do.'));
+        return res.status(400).send(getErrorHtml('Phiên thanh toán đã được xử lý trước đó.'));
     }
 
     session.status = 'success';
@@ -100,11 +100,11 @@ app.post('/api/cancel/:sessionId', (req, res) => {
     const session = sessions.get(sessionId);
 
     if (!session) {
-        return res.status(404).send(getErrorHtml('Phien thanh toan khong ton tai hoac da het han.'));
+        return res.status(404).send(getErrorHtml('Phiên thanh toán không tồn tại hoặc đã hết hạn.'));
     }
 
     if (session.status !== 'pending') {
-        return res.status(400).send(getErrorHtml('Phien thanh toan da duoc xu ly truoc do.'));
+        return res.status(400).send(getErrorHtml('Phiên thanh toán đã được xử lý trước đó.'));
     }
 
     session.status = 'cancelled';
@@ -137,7 +137,7 @@ function getPaymentHtml(amount, sessionId) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thanh toan MoMo</title>
+    <title>Thanh toán MoMo</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -187,23 +187,23 @@ function getPaymentHtml(amount, sessionId) {
         <div class="logo">
             <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo Logo" />
         </div>
-        <h1>Thanh toan MoMo</h1>
-        <p class="subtitle">Don hang tu MyShop</p>
+        <h1>Thanh toán MoMo</h1>
+        <p class="subtitle">Đơn hàng từ MyShop</p>
         
-        <p class="amount-label">So tien thanh toan</p>
+        <p class="amount-label">Số tiền thanh toán</p>
         <p class="amount">${formatVND(amount)}</p>
         <p class="currency">VND</p>
         
         <div class="divider"></div>
         
         <form action="/api/confirm/${sessionId}" method="POST">
-            <button class="btn btn-confirm" type="submit">Xac nhan thanh toan</button>
+            <button class="btn btn-confirm" type="submit">Xác nhận thanh toán</button>
         </form>
         <form action="/api/cancel/${sessionId}" method="POST">
-            <button class="btn btn-cancel" type="submit">Huy</button>
+            <button class="btn btn-cancel" type="submit">Hủy bỏ</button>
         </form>
         
-        <p class="security-note">Giao dich duoc bao mat boi MoMo</p>
+        <p class="security-note">Giao dịch được bảo mật bởi MoMo</p>
     </div>
 </body>
 </html>`;
@@ -215,7 +215,7 @@ function getSuccessHtml() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thanh toan thanh cong</title>
+    <title>Thanh toán thành công</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -243,8 +243,8 @@ function getSuccessHtml() {
         <div class="icon">
             <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
         </div>
-        <h1>Thanh toan thanh cong!</h1>
-        <p>Giao dich cua ban da duoc xu ly.<br>Ban co the dong tab nay.</p>
+        <h1>Thanh toán thành công!</h1>
+        <p>Giao dịch của bạn đã được xử lý.<br>Bạn có thể đóng tab này.</p>
     </div>
 </body>
 </html>`;
@@ -256,7 +256,7 @@ function getCancelledHtml() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Da huy thanh toan</title>
+    <title>Đã hủy thanh toán</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -284,8 +284,8 @@ function getCancelledHtml() {
         <div class="icon">
             <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </div>
-        <h1>Da huy thanh toan</h1>
-        <p>Giao dich cua ban da bi huy.<br>Ban co the dong tab nay.</p>
+        <h1>Đã hủy thanh toán</h1>
+        <p>Giao dịch của bạn đã bị hủy.<br>Bạn có thể đóng tab này.</p>
     </div>
 </body>
 </html>`;
@@ -297,7 +297,7 @@ function getExpiredHtml() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phien het han</title>
+    <title>Phiên hết hạn</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -315,8 +315,8 @@ function getExpiredHtml() {
 </head>
 <body>
     <div class="card">
-        <h1>Phien thanh toan het han</h1>
-        <p>Vui long tao giao dich moi tu ung dung.</p>
+        <h1>Phiên thanh toán hết hạn</h1>
+        <p>Vui lòng tạo giao dịch mới từ ứng dụng.</p>
     </div>
 </body>
 </html>`;
@@ -329,7 +329,7 @@ function getProcessedHtml(status) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giao dich da xu ly</title>
+    <title>Giao dịch đã xử lý</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -347,8 +347,8 @@ function getProcessedHtml(status) {
 </head>
 <body>
     <div class="card">
-        <h1>${isSuccess ? 'Giao dich da thanh cong' : 'Giao dich da bi huy'}</h1>
-        <p>Phien thanh toan nay da duoc xu ly truoc do.</p>
+        <h1>${isSuccess ? 'Giao dịch đã thành công' : 'Giao dịch đã bị hủy'}</h1>
+        <p>Phiên thanh toán này đã được xử lý trước đó.</p>
     </div>
 </body>
 </html>`;
@@ -360,7 +360,7 @@ function getErrorHtml(message) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loi</title>
+    <title>Lỗi</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
